@@ -1,16 +1,32 @@
-# React + Vite
+# InterTrap — Build Yourself
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+InterTrap is an interview performance workspace for students and job seekers, built with React, Vite and Supabase. It supports registration, login, logout and session restoration. Its protected workspace includes navigation, an account profile and a four-step interview preview.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```powershell
+npm.cmd ci
+npm.cmd run dev
+```
 
-## React Compiler
+Use the existing Supabase configuration with `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the ignored `.env.local` file.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Database and workspace modules
 
-## Expanding the Oxlint configuration
+| Module | Repository implementation | Documentation |
+| --- | --- | --- |
+| 4 | PostgreSQL schema, profile backfill, round categories and topics | [Setup](docs/MODULE_4_SETUP.md) · [Design](docs/DATABASE_DESIGN.md) · [ER diagram](docs/ER_DIAGRAM.md) · [Future queries](docs/DATABASE_QUERIES.md) |
+| 5 | Grants and row-level security for owner-scoped access and read-only catalogs | [Setup](docs/MODULE_5_SETUP.md) · [Security](docs/RLS_SECURITY.md) |
+| 6 | Responsive protected layout, dashboard, feature pages and account details | [Frontend](docs/MODULE_6_FRONTEND.md) |
+| 7 | Dynamic rounds, weakness selections, progression and a validated in-memory preview | [Interview form](docs/MODULE_7_INTERVIEW_FORM.md) |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Apply migrations 001–004 and the seed if Module 4 is pending, then apply migration 005. The setup guides include preflight checks, a rollback-based SQL suite and two-session API verification. The form requires a signed-in session and the seeded Supabase catalog. Interview previews are kept in memory for the current page. Persistence, transactional progression, analytics, charts and AI insights are planned for later modules.
+
+## Checks
+
+```powershell
+npm.cmd test
+npm.cmd run lint
+npm.cmd run build
+git diff --check
+```

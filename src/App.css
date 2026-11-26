@@ -39,7 +39,7 @@
 .hero h1 { font-size: clamp(2.75rem, 9vw, 6rem); letter-spacing: -.055em; }
 .hero p { max-width: 36rem; margin-top: 1.25rem; font-size: clamp(1.05rem, 2vw, 1.3rem); }
 .features { padding-bottom: 4rem; }
-.feature-grid, .metrics, .dashboard-sections { display: grid; gap: 1rem; }
+.feature-grid { display: grid; gap: 1rem; }
 .feature-grid { margin-top: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
 .card {
   padding: clamp(1rem, 3vw, 1.5rem);
@@ -83,32 +83,6 @@
 .auth-footer { font-size: .95rem; }
 .session-status { display: grid; min-height: 100svh; place-items: center; }
 
-.dashboard { display: grid; grid-template-columns: 15rem minmax(0, 1fr); min-height: 100svh; }
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-  padding: 1.25rem;
-  border-right: 1px solid var(--border);
-  background: var(--card);
-}
-.sidebar nav { display: flex; flex-direction: column; gap: .25rem; }
-.sidebar nav a { padding: .55rem .65rem; border-radius: .5rem; color: var(--text); text-decoration: none; }
-.sidebar nav a:hover { background: var(--background); }
-.account { margin-top: auto; overflow-wrap: anywhere; }
-.account .button { margin-top: .75rem; }
-.dashboard-main { padding: clamp(1rem, 4vw, 3rem); overflow-wrap: anywhere; }
-.dashboard-main header p { margin-top: .5rem; }
-.metrics { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); margin-block: 1.75rem; }
-.metrics dt { color: var(--muted); font-size: .95rem; }
-.metrics dd { color: var(--accent); font-size: 2rem; font-weight: 750; }
-.dashboard-sections { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
-
-@media (max-width: 48rem) {
-  .dashboard { grid-template-columns: minmax(0, 1fr); }
-  .sidebar { gap: .75rem; border-right: 0; border-bottom: 1px solid var(--border); }
-  .sidebar nav { flex-direction: row; flex-wrap: wrap; }
-}
 @media (prefers-reduced-motion: reduce) {
   .button { transition: none; }
 }

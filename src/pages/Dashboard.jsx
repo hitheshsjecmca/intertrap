@@ -1,75 +1,49 @@
-import { useState } from 'react'
-import Brand from '../components/Brand.jsx'
-import { useAuth } from '../context/AuthContext.jsx'
-import { supabase } from '../lib/supabase.js'
+import { Link, useOutletContext } from 'react-router-dom'
+import { AddInterviewLink, EmptyState, PageHeading } from '../components/ui/WorkspaceUI.jsx'
+import { ProgressDial, TelemetryGrid } from '../components/ui/HudVisuals.jsx'
+import IrisAssistant from '../components/ui/IrisAssistant.jsx'
 
-const metrics = ['Total Interviews', 'Selected Interviews', 'Rejected Interviews', 'Pending Interviews']
-const sections = [
-  ['readiness', 'Interview Readiness', 'Readiness insights will be available in a future module.'],
-  ['interviews', 'Recent Interviews', 'Your workspace has no interview records yet.'],
-  ['weaknesses', 'Weakness Analysis', 'Weakness analysis will be available in a future module.'],
-  ['recommendations', 'AI Recommendations', 'AI recommendations will be available in a future module.'],
+const metrics = [
+  ['Total interviews', '▥', 'total'],
+  ['Selected interviews', '✓', 'selected'],
+  ['Rejected interviews', '×', 'rejected'],
+  ['Pending interviews', '◷', 'pending'],
 ]
 
 export default function Dashboard() {
-  const { user } = useAuth()
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState('')
-  const fullName = user.user_metadata?.full_name
-  const displayName = typeof fullName === 'string' && fullName.trim() ? fullName : 'InterTrap member'
+  const { displayName } = useOutletContext()
 
-  async function logout() {
-    setPending(true)
-    setError('')
-    try {
-      const { error: signOutError } = await supabase.auth.signOut()
-      if (signOutError) throw signOutError
-    } catch {
-      setError('Could not log out. Check your connection and try again.')
-    } finally {
-      setPending(false)
-    }
-  }
-
-  return (
-    <div className="dashboard">
-      <aside className="sidebar">
-        <Brand />
-        <nav aria-label="Dashboard navigation">
-          <a href="#overview">Overview</a>
-          {sections.map(([id, title]) => <a key={id} href={'#' + id}>{title}</a>)}
-        </nav>
-        <div className="account">
-          <strong>{displayName}</strong>
-          <p>{user.email}</p>
-          <button type="button" className="button secondary" onClick={logout} disabled={pending}>
-            {pending ? 'Logging out...' : 'Log out'}
-          </button>
-          {error && <p className="feedback error" role="alert">{error}</p>}
-        </div>
-      </aside>
-      <main className="dashboard-main" id="overview">
-        <header>
-          <h1>Welcome, {displayName}</h1>
-          <p>Your interview workspace</p>
-        </header>
-        <dl className="metrics">
-          {metrics.map((title) => (
-            <div className="card" key={title}>
-              <dt>{title}</dt>
-              <dd>0</dd>
-            </div>
-          ))}
-        </dl>
-        <div className="dashboard-sections">
-          {sections.map(([id, title, description]) => (
-            <section className="card" id={id} key={id}>
-              <h2>{title}</h2>
-              <p>{description}</p>
-            </section>
-          ))}
-        </div>
-      </main>
+  return <>
+    <PageHeading title="Career Command Center" description={`Welcome, ${displayName}.`} action={<AddInterviewLink />} />
+    <dl className="ws-metrics" aria-label="Interview statistics">
+      {metrics.map(([title, icon, tone]) => <div className="ws-card ws-stat" data-tone={tone} key={title}>
+        <dt>{title}<span className="hud-stat-icon" aria-hidden="true">{icon}</span></dt>
+        <dd><span aria-hidden="true">—</span><span className="hud-sr">Insufficient data</span></dd>
+      </div>)}
+    </dl>
+    <div className="hud-overview">
+      <section className="ws-card hud-readiness">
+        <h2>Interview Readiness</h2>
+        <ProgressDial label="Readiness score unavailable" />
+        <p>Insufficient data</p>
+      </section>
+      <section className="ws-card hud-skill">
+        <h2>Skill Telemetry</h2>
+        <TelemetryGrid />
+        <p>Skill analytics will appear here when available.</p>
+      </section>
+      <IrisAssistant />
     </div>
-  )
+    <div className="ws-grid hud-detail">
+      <EmptyState title="First-Round Rejections">Insufficient data to analyse first-round rejections.</EmptyState>
+      <EmptyState title="Selection Rate">Requires at least one final selection or rejection.</EmptyState>
+      <section className="ws-card ws-empty">
+        <h2>Interview Progression</h2>
+        <p>Build a draft to see its round-by-round timeline.</p>
+        <Link to="/interviews/new">Preview a timeline →</Link>
+      </section>
+      <EmptyState title="Weakness Detection">Reported topics will appear here when weakness analytics are available.</EmptyState>
+      <EmptyState title="Recent Interview Activity">Interview history will be available once records can be saved.</EmptyState>
+    </div>
+  </>
 }

@@ -1,0 +1,99 @@
+import { useEffect, useId, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { IntelligenceCore } from './HudVisuals.jsx'
+
+const welcome = 'Welcome back. I can help you navigate InterTrap and prepare an interview preview.'
+const guidance = [
+  ['Interview preview', 'Open Add Interview, enter the company details, and configure your rounds. The final step reviews your draft.'],
+  ['Record weaknesses', 'In the interview form, mark a round cleared or rejected to select weakness topics. You can add a custom topic and rate its severity.'],
+  ['Readiness status', 'Insufficient data. Readiness and personalised recommendations will be available in a future module.'],
+]
+
+export default function IrisAssistant({ initiallyOpen = false }) {
+  const panelId = useId()
+  const [open, setOpen] = useState(initiallyOpen)
+  const [response, setResponse] = useState(welcome)
+  const [voice, setVoice] = useState(false)
+  const [speaking, setSpeaking] = useState(false)
+  const [speechError, setSpeechError] = useState('')
+  const utterance = useRef(null)
+  const speech = typeof window !== 'undefined' && 'SpeechSynthesisUtterance' in window
+    ? window.speechSynthesis : undefined
+
+  useEffect(() => () => {
+    if (!utterance.current) return
+    utterance.current = null
+    speech?.cancel()
+  }, [speech])
+
+  function stop() {
+    const active = utterance.current
+    utterance.current = null
+    if (active) speech?.cancel()
+    setSpeaking(false)
+  }
+
+  function toggleVoice() {
+    if (voice) stop()
+    setVoice(!voice)
+    setSpeechError('')
+  }
+
+  function speak() {
+    if (!voice || !speech) return
+    stop()
+    setSpeechError('')
+    const message = new window.SpeechSynthesisUtterance(response)
+    message.lang = 'en'
+    message.rate = 0.95
+    function finish(failed) {
+      if (utterance.current !== message) return
+      utterance.current = null
+      setSpeaking(false)
+      if (failed) setSpeechError('Voice playback failed. Try again or read the response below.')
+    }
+    message.onend = () => finish(false)
+    message.onerror = () => finish(true)
+    utterance.current = message
+    setSpeaking(true)
+    try {
+      speech.speak(message)
+    } catch {
+      finish(true)
+    }
+  }
+
+  function togglePanel() {
+    if (open) stop()
+    setOpen(!open)
+  }
+
+  return <section className="ws-card iris-panel" aria-label="I.R.I.S. assistant">
+    <div className="iris-summary">
+      <IntelligenceCore compact />
+      <div>
+        <h2>I.R.I.S.</h2>
+        <p>Interview Readiness Intelligence System</p>
+        <p className="iris-status"><span aria-hidden="true" /> Scripted guidance</p>
+      </div>
+    </div>
+    <button type="button" className="ws-button ws-secondary" aria-expanded={open}
+      aria-controls={panelId} onClick={togglePanel}>{open ? 'Close assistant' : 'Open assistant'}</button>
+    <div id={panelId} hidden={!open} className="iris-console">
+      <p className="iris-response" aria-live="polite" aria-atomic="true">{response}</p>
+      <div className="iris-actions" role="group" aria-label="Suggested questions">
+        {guidance.map(([label, answer]) => <button className="ws-button ws-secondary" type="button" key={label}
+          onClick={() => { stop(); setSpeechError(''); setResponse(answer) }}>{label}</button>)}
+      </div>
+      <Link to="/interviews/new">Start an interview preview →</Link>
+      {speech ? <div className="iris-actions">
+        <button type="button" className="ws-button ws-secondary" aria-pressed={voice}
+          onClick={toggleVoice}>{voice ? 'Mute voice' : 'Enable voice'}</button>
+        <button type="button" className="ws-button ws-secondary" disabled={!voice || speaking}
+          onClick={speak}>Read response</button>
+        {speaking && <button type="button" className="ws-button ws-secondary" onClick={stop}>Stop voice</button>}
+      </div> : <p>Voice playback is unavailable in this browser.</p>}
+      {speechError && <p role="status">{speechError}</p>}
+    </div>
+  </section>
+}

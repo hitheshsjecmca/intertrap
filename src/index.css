@@ -1,22 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@500;600;700;800&display=swap');
+
 :root {
   color-scheme: dark;
-  --background: #0f172a;
-  --card: #1e293b;
-  --accent: #34d399;
-  --primary: #059669;
-  --text: #f8fafc;
+  --background: #030b14;
+  --card: #081c2c;
+  --accent: #00d9ff;
+  --primary: #007bff;
+  --success: #22c55e;
+  --warning: #ffb800;
+  --critical: #ff3344;
+  --error: #ff8993;
+  --text: #e2e8f0;
   --muted: #94a3b8;
-  --border: #334155;
-  --error: #f87171;
+  --border: #24536a;
+  --heading-font: Orbitron, 'Segoe UI', sans-serif;
+  --body-font: Inter, system-ui, 'Segoe UI', sans-serif;
+  --mono-font: 'JetBrains Mono', monospace;
+  --glow: 0 0 22px #00d9ff30;
+  --corner: 10px;
   background: var(--background);
   color: var(--text);
-  font: 16px/1.55 system-ui, 'Segoe UI', sans-serif;
+  font: 16px/1.55 var(--body-font);
 }
 
 * { box-sizing: border-box; }
 body { margin: 0; }
 h1, h2, h3, p, dl, dd { margin: 0; }
-h1, h2, h3 { line-height: 1.2; }
+h1, h2, h3 { line-height: 1.25; }
+h1, h2 { font-family: var(--heading-font); }
 p { color: var(--muted); }
 a { color: var(--accent); }
 button, input { font: inherit; }
