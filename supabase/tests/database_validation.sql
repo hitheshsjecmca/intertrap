@@ -306,14 +306,14 @@ BEGIN
     BEGIN
         UPDATE public.interview_rounds SET round_type_id = hr_type WHERE id = coding_round;
         RAISE EXCEPTION 'Expected failure for incompatible round category change';
-    EXCEPTION WHEN foreign_key_violation THEN
+    EXCEPTION WHEN foreign_key_violation OR restrict_violation THEN
         NULL;
     END;
 
     BEGIN
         UPDATE public.topics SET round_type_id = hr_type WHERE id = fixture_topic;
         RAISE EXCEPTION 'Expected failure for incompatible topic category change';
-    EXCEPTION WHEN foreign_key_violation THEN
+    EXCEPTION WHEN foreign_key_violation OR restrict_violation THEN
         NULL;
     END;
 

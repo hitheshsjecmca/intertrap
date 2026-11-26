@@ -5,12 +5,11 @@ import AppLayout from './components/layout/AppLayout.jsx'
 import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import AddInterview from './pages/AddInterview.jsx'
-import { InterviewHistory, Analytics, Weaknesses, AIInsights, Profile, Settings } from './pages/WorkspacePages.jsx'
+import { AIInsights, Profile, Settings } from './pages/WorkspacePages.jsx'
 import './App.css'
 import './styles/workspace.css'
 import './styles/hud.css'
+import './styles/performance.css'
 
 function GuestRoute() {
   const { user, loading } = useAuth()
@@ -25,13 +24,18 @@ const router = createBrowserRouter([
     { path: '/login', element: <Login /> },
     { path: '/register', element: <Register /> },
   ] },
-  { element: <ProtectedRoute />, children: [
+  { element: <ProtectedRoute />, hydrateFallbackElement: <p className="session-status" role="status">Opening workspace…</p>, children: [
     { element: <AppLayout />, children: [
-      { path: '/dashboard', element: <Dashboard /> },
-      { path: '/interviews/new', element: <AddInterview /> },
-      { path: '/interviews', element: <InterviewHistory /> },
-      { path: '/analytics', element: <Analytics /> },
-      { path: '/weaknesses', element: <Weaknesses /> },
+      { path: '/dashboard', lazy: async () => ({ Component: (await import('./pages/Dashboard.jsx')).default }) },
+      { path: '/interviews/new', lazy: async () => ({ Component: (await import('./pages/AddInterview.jsx')).default }) },
+      { path: '/interviews', lazy: async () => ({ Component: (await import('./pages/InterviewHistory.jsx')).default }) },
+      { path: '/interviews/:id', lazy: async () => ({ Component: (await import('./pages/InterviewRecord.jsx')).default }) },
+      { path: '/interviews/:id/edit', lazy: async () => {
+        const { default: InterviewRecord } = await import('./pages/InterviewRecord.jsx')
+        return { element: <InterviewRecord edit /> }
+      } },
+      { path: '/analytics', lazy: async () => ({ Component: (await import('./pages/Analytics.jsx')).default }) },
+      { path: '/weaknesses', lazy: async () => ({ Component: (await import('./pages/Weaknesses.jsx')).default }) },
       { path: '/ai-insights', element: <AIInsights /> },
       { path: '/profile', element: <Profile /> },
       { path: '/settings', element: <Settings /> },

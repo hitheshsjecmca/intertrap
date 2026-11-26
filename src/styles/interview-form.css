@@ -25,7 +25,7 @@
 .if-panel { min-inline-size: 0; margin: 0; padding: .85rem; border: 1px solid var(--border); border-radius: 10px; }
 .if-panel legend { padding-inline: .3rem; font-weight: 700; }
 .if-panel h3 { margin-bottom: .6rem; }
-.if-actions, .if-footer { display: flex; flex-wrap: wrap; gap: .5rem; }
+.if-footer { display: flex; flex-wrap: wrap; gap: .5rem; }
 .if-panel > .if-actions, .if-panel > p, .if-leave > .if-actions { margin-top: .75rem; }
 .if-footer { justify-content: space-between; border-top: 1px solid var(--border); padding-top: 1rem; }
 .if-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-block: .75rem; }

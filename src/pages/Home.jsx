@@ -4,10 +4,10 @@ import { IntelligenceCore } from '../components/ui/HudVisuals.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const features = [
-  ['Interview previews', 'Configure companies, interview rounds and outcomes in a single draft.'],
+  ['Interview records', 'Save companies, interview rounds and outcomes in your personal history.'],
   ['Weakness identification', 'Use notes from each round to spot topics and skills that need more practice.'],
-  ['Performance analytics', 'Trend reporting is planned for a future module.'],
-  ['I.R.I.S. guidance', 'Find your way around the workspace and prepare an interview preview.'],
+  ['Performance analytics', 'Compare observed outcomes and preparation priorities across interviews.'],
+  ['I.R.I.S. guidance', 'Find your way around the workspace and understand your recorded outcomes.'],
 ]
 
 export default function Home() {

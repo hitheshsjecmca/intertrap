@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useBlocker, useNavigate } from 'react-router-dom'
 import { fetchCatalog } from '../../services/catalogService.js'
+import { createInterview, updateInterview } from '../../services/interviewService.js'
 import { LoadingSignal } from '../ui/HudVisuals.jsx'
 import { isAttempted, moveRound, preparePayload, reviseRounds, validateCompany, validateRounds, validateWeaknesses } from '../../utils/interviewDraft.js'
 import { CompanyStep, RoundsStep, WeaknessStep } from './InterviewSteps.jsx'
 import InterviewReview from './InterviewReview.jsx'
 import '../../styles/interview-form.css'
 
-const steps = ['Company details', 'Interview rounds', 'Weakness identification', 'Review and preview']
+const steps = ['Company details', 'Interview rounds', 'Weakness identification', 'Review and save']
 
 function initialDraft() {
   const today = new Date()
@@ -23,18 +24,22 @@ function newRound() {
   return { key: crypto.randomUUID(), round_type_id: '', custom_name: '', round_date: '', status: 'pending', notes: '', weaknesses: [] }
 }
 
-export default function InterviewForm() {
-  const [draft, setDraft] = useState(initialDraft)
+export default function InterviewForm({ initial, record }) {
+  const [draft, setDraft] = useState(() => initial ?? initialDraft())
   const [step, setStep] = useState(0)
   const [issue, setIssue] = useState('')
   const [dirty, setDirty] = useState(false)
-  const [preview, setPreview] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [saveFailed, setSaveFailed] = useState(false)
   const [catalog, setCatalog] = useState(null)
   const [catalogError, setCatalogError] = useState('')
   const [attempt, setAttempt] = useState(0)
   const heading = useRef(null)
+  const requestId = useRef(null)
+  const inFlight = useRef(false)
+  const confirmedPath = useRef(null)
   const navigate = useNavigate()
-  const blocker = useBlocker(dirty)
+  const blocker = useBlocker(({ nextLocation }) => (dirty || inFlight.current) && nextLocation.pathname !== confirmedPath.current)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -59,7 +64,7 @@ export default function InterviewForm() {
     setDraft(next)
     setDirty(true)
     setIssue('')
-    setPreview(null)
+    setSaveFailed(false)
   }
 
   function commitRounds(rounds) {
@@ -70,7 +75,8 @@ export default function InterviewForm() {
       return (isAttempted(before) && (!after || !isAttempted(after)))
         || (before.weaknesses.length > 0 && (!after || !after.weaknesses.length))
     })
-    if (losesData && !window.confirm('This change will discard a recorded round outcome or selected weaknesses. Continue?')) return
+    const losesSelection = draft.overall_status === 'selected' && next.overall_status !== 'selected'
+    if ((losesData || losesSelection) && !window.confirm('This change will revise a recorded outcome or discard selected weaknesses. Continue?')) return
     setValue(next)
   }
 
@@ -94,9 +100,9 @@ export default function InterviewForm() {
     heading.current?.focus()
   }
 
-  function advance(event) {
+  async function advance(event) {
     event.preventDefault()
-    if (step > 0 && !catalog) return
+    if (inFlight.current || (step > 0 && !catalog)) return
     const errors = [
       () => validateCompany(draft),
       () => validateRounds(draft.rounds, catalog.categories),
@@ -109,8 +115,27 @@ export default function InterviewForm() {
       return
     }
     const { payload, error } = preparePayload(draft, catalog)
-    if (error) setIssue(error)
-    else setPreview(payload)
+    if (error) { setIssue(error); return }
+    inFlight.current = true
+    setIssue('')
+    setSaveFailed(false)
+    setSaving(true)
+    try {
+      requestId.current ??= crypto.randomUUID()
+      const result = record
+        ? await updateInterview(record.id, payload, record.version)
+        : await createInterview(payload, requestId.current)
+      if (!result?.id) throw new Error('The save could not be confirmed. Check History before retrying.')
+      confirmedPath.current = '/interviews/' + result.id
+      setDirty(false)
+      await navigate(confirmedPath.current, { replace: true, state: { saved: record ? 'updated' : 'created' } })
+    } catch (saveError) {
+      setIssue(saveError.message)
+      setSaveFailed(true)
+    } finally {
+      inFlight.current = false
+      setSaving(false)
+    }
   }
 
   return <>
@@ -119,7 +144,7 @@ export default function InterviewForm() {
       <p>Your changes will be lost when you leave this page.</p>
       <div className="if-actions">
         <button type="button" autoFocus className="ws-button ws-secondary" onClick={blocker.reset}>Keep editing</button>
-        <button type="button" className="ws-button" onClick={blocker.proceed}>Discard and leave</button>
+        <button type="button" className="ws-button" disabled={saving} onClick={blocker.proceed}>Discard and leave</button>
       </div>
     </section>}
     <form className="ws-card if-form" noValidate onSubmit={advance}>
@@ -150,13 +175,16 @@ export default function InterviewForm() {
       {step === 3 && catalog && <InterviewReview draft={draft} catalog={catalog} />}
       </div>
       {issue && <p role="alert" className="ws-error">{issue}</p>}
-      {preview && <p className="if-confirmation" role="status">Preview complete for {preview.company_name}. This draft is available only on this page.</p>}
+      {step === 3 && <p className="if-confirmation" role="status">{saving
+        ? 'I.R.I.S. · Recording interview data. Synchronizing your performance profile.'
+        : saveFailed ? 'I.R.I.S. · Synchronization failed. Your draft remains available for retry.'
+          : 'I.R.I.S. · Review your interview configuration before saving.'}</p>}
       <div className="if-footer">
-        <button type="button" className="ws-button ws-secondary" onClick={() => navigate('/dashboard')}>Cancel</button>
+        <button type="button" className="ws-button ws-secondary" disabled={saving} onClick={() => navigate(record ? '/interviews/' + record.id : '/interviews')}>Cancel</button>
         <div className="if-actions">
-          {step > 0 && <button type="button" className="ws-button ws-secondary" onClick={() => goTo(step - 1)}>Previous</button>}
-          <button type="submit" className="ws-button" disabled={step > 0 && !catalog}>
-            {step === 3 ? 'Complete Preview' : 'Next'}
+          {step > 0 && <button type="button" className="ws-button ws-secondary" disabled={saving} onClick={() => goTo(step - 1)}>Previous</button>}
+          <button type="submit" className="ws-button" disabled={saving || (step > 0 && !catalog)}>
+            {saving ? 'Saving…' : step === 3 ? 'Save Interview' : 'Next'}
           </button>
         </div>
       </div>

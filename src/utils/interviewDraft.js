@@ -10,9 +10,11 @@ export function isAttempted(round) {
 
 export function applyProgression(rounds) {
   let rejected = false
+  let pending = false
   return rounds.map((round, index) => {
-    const status = rejected ? 'not_reached' : round.status === 'not_reached' ? 'pending' : round.status
+    const status = rejected ? 'not_reached' : pending || round.status === 'not_reached' ? 'pending' : round.status
     if (status === 'rejected') rejected = true
+    if (status === 'pending') pending = true
     return {
       ...round,
       round_number: index + 1,
@@ -26,7 +28,8 @@ export function reviseRounds(draft, rounds) {
   const next = applyProgression(rounds)
   const rejected = next.some((round) => round.status === 'rejected')
   const previouslyRejected = draft.rounds.some((round) => round.status === 'rejected')
-  return { ...draft, rounds: next, overall_status: rejected ? 'rejected' : previouslyRejected ? 'pending' : draft.overall_status }
+  const incompleteSelection = draft.overall_status === 'selected' && next.some((round) => round.status !== 'cleared')
+  return { ...draft, rounds: next, overall_status: rejected ? 'rejected' : previouslyRejected || incompleteSelection ? 'pending' : draft.overall_status }
 }
 
 export function moveRound(rounds, index, offset) {
@@ -132,6 +135,9 @@ export function preparePayload(draft, { categories, topics }) {
   if (draft.rounds.some((round) => round.status === 'rejected') && draft.overall_status !== 'rejected') {
     return { error: 'A rejected round requires a rejected interview outcome.' }
   }
+  if (draft.overall_status === 'selected' && draft.rounds.some((round) => round.status !== 'cleared')) {
+    return { error: 'All configured rounds must be cleared to record a selection.' }
+  }
 
   return { payload: {
     company_name: draft.company_name.trim(),
@@ -141,6 +147,7 @@ export function preparePayload(draft, { categories, topics }) {
     overall_status: draft.overall_status,
     notes: draft.notes.trim() || null,
     rounds: draft.rounds.map((round) => ({
+        ...(round.id ? { id: round.id } : {}),
       round_number: round.round_number,
       round_type_id: categories.find(({ id }) => String(id) === String(round.round_type_id)).id,
       custom_name: round.custom_name.trim() || null,
@@ -148,6 +155,7 @@ export function preparePayload(draft, { categories, topics }) {
       status: round.status,
       notes: round.notes.trim() || null,
       weaknesses: round.weaknesses.map((weakness) => ({
+          ...(weakness.id ? { id: weakness.id } : {}),
         topic_id: weakness.topic_id ?? null,
         custom_topic: weakness.custom_topic == null ? null : normalizeTopic(weakness.custom_topic),
         severity: weakness.severity,

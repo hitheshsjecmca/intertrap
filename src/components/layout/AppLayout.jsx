@@ -1,21 +1,22 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Activity, Archive, Crosshair, LayoutDashboard, Plus, Settings, Sparkles, UserRound } from 'lucide-react'
 import Brand from '../Brand.jsx'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { supabase } from '../../lib/supabase.js'
 
 const groups = [
   ['Workspace', [
-    ['/dashboard', 'Dashboard', '▦'],
-    ['/interviews/new', 'Add Interview', '+'],
-    ['/interviews', 'Interview History', '◷'],
-    ['/analytics', 'Performance Analytics', '↗'],
-    ['/weaknesses', 'Weakness Analysis', '◎'],
-    ['/ai-insights', 'AI Insights', '✧'],
+    ['/dashboard', 'Command Center', LayoutDashboard],
+    ['/interviews/new', 'Add Interview', Plus],
+    ['/interviews', 'Interview History', Archive],
+    ['/analytics', 'Performance Analytics', Activity],
+    ['/weaknesses', 'Weakness Analysis', Crosshair],
+    ['/ai-insights', 'I.R.I.S. Insights', Sparkles],
   ]],
   ['Account', [
-    ['/profile', 'Profile', '○'],
-    ['/settings', 'Settings', '⚙'],
+    ['/profile', 'Profile', UserRound],
+    ['/settings', 'Settings', Settings],
   ]],
 ]
 
@@ -56,9 +57,9 @@ export default function AppLayout() {
             {groups.map(([group, items]) => (
               <div className="ws-nav-group" key={group}>
                 <p>{group}</p>
-                {items.map(([path, label, icon]) => (
+                {items.map(([path, label, Icon]) => (
                   <NavLink end to={path} key={path} onClick={() => setMenuOpen(false)}>
-                    <span aria-hidden="true">{icon}</span>{label}
+                    <Icon size={17} aria-hidden="true" />{label}
                   </NavLink>
                 ))}
               </div>
@@ -73,7 +74,10 @@ export default function AppLayout() {
         </div>
       </aside>
       <main className="ws-main" id="workspace-main" tabIndex={-1}>
-        <div className="hud-page" key={pathname}>
+        <nav className="ws-topbar" aria-label="Account shortcut">
+          <Link to="/profile"><UserRound size={16} aria-hidden="true" />{displayName}</Link>
+        </nav>
+        <div className="hud-page" key={user.id + ':' + pathname}>
           <Outlet context={{ user, displayName, logout, pending, error }} />
         </div>
       </main>

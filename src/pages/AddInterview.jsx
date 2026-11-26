@@ -6,7 +6,7 @@ export default function AddInterview() {
   const { user } = useOutletContext()
 
   return <>
-    <PageHeading title="Add Interview" description="Configure rounds, record weaknesses and review a preview. Interview storage comes in a later module." />
+    <PageHeading title="Add Interview" description="Configure rounds, record weaknesses and review the interview before saving." />
     <InterviewForm key={user.id} />
   </>
 }

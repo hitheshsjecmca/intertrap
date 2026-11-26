@@ -3,29 +3,8 @@ import { useOutletContext } from 'react-router-dom'
 import { LogoutButton } from '../components/layout/AppLayout.jsx'
 import IrisAssistant from '../components/ui/IrisAssistant.jsx'
 import { LoadingSignal } from '../components/ui/HudVisuals.jsx'
-import { AddInterviewLink, EmptyState, PageHeading } from '../components/ui/WorkspaceUI.jsx'
+import { PageHeading } from '../components/ui/WorkspaceUI.jsx'
 import { supabase } from '../lib/supabase.js'
-
-export function InterviewHistory() {
-  return <>
-    <PageHeading title="Interview History" description="Review past interviews and outcomes." action={<AddInterviewLink />} />
-    <EmptyState title="No interview history available">Saved interviews, search and filters will be available in a later module.</EmptyState>
-  </>
-}
-
-export function Analytics() {
-  return <>
-    <PageHeading title="Performance Analytics" description="Review interview and round outcomes over time." />
-    <EmptyState title="Analytics require interview data">Performance metrics will appear after interview storage and analytics are available.</EmptyState>
-  </>
-}
-
-export function Weaknesses() {
-  return <>
-    <PageHeading title="Weakness Analysis" description="Find recurring topics to practise." action={<AddInterviewLink />} />
-    <EmptyState title="No recorded topics to analyse">Saved weakness selections will appear here by round category.</EmptyState>
-  </>
-}
 
 export function AIInsights() {
   return <>

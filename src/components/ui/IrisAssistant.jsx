@@ -2,17 +2,18 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { IntelligenceCore } from './HudVisuals.jsx'
 
-const welcome = 'Welcome back. I can help you navigate InterTrap and prepare an interview preview.'
+const welcome = 'Welcome back. I can help you record interviews and interpret your workspace reports.'
 const guidance = [
-  ['Interview preview', 'Open Add Interview, enter the company details, and configure your rounds. The final step reviews your draft.'],
+  ['Record an interview', 'Open Add Interview, enter the company details, and configure your rounds. Review the draft before saving it.'],
   ['Record weaknesses', 'In the interview form, mark a round cleared or rejected to select weakness topics. You can add a custom topic and rate its severity.'],
-  ['Readiness status', 'Insufficient data. Readiness and personalised recommendations will be available in a future module.'],
+  ['Readiness status', 'Open Performance Analytics to see readiness, assessment coverage and the sample behind the estimate.'],
 ]
 
-export default function IrisAssistant({ initiallyOpen = false }) {
+export default function IrisAssistant({ initiallyOpen = false, contextMessage = welcome }) {
   const panelId = useId()
   const [open, setOpen] = useState(initiallyOpen)
-  const [response, setResponse] = useState(welcome)
+  const [answer, setResponse] = useState(null)
+  const response = answer ?? contextMessage
   const [voice, setVoice] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const [speechError, setSpeechError] = useState('')
@@ -80,12 +81,14 @@ export default function IrisAssistant({ initiallyOpen = false }) {
     <button type="button" className="ws-button ws-secondary" aria-expanded={open}
       aria-controls={panelId} onClick={togglePanel}>{open ? 'Close assistant' : 'Open assistant'}</button>
     <div id={panelId} hidden={!open} className="iris-console">
+      <p className="iris-status">Gemini integration pending.</p>
       <p className="iris-response" aria-live="polite" aria-atomic="true">{response}</p>
       <div className="iris-actions" role="group" aria-label="Suggested questions">
         {guidance.map(([label, answer]) => <button className="ws-button ws-secondary" type="button" key={label}
           onClick={() => { stop(); setSpeechError(''); setResponse(answer) }}>{label}</button>)}
       </div>
-      <Link to="/interviews/new">Start an interview preview →</Link>
+      <Link to="/interviews/new">Record an interview →</Link>
+      <Link to="/analytics">Open performance analytics →</Link>
       {speech ? <div className="iris-actions">
         <button type="button" className="ws-button ws-secondary" aria-pressed={voice}
           onClick={toggleVoice}>{voice ? 'Mute voice' : 'Enable voice'}</button>

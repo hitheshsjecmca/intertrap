@@ -1,49 +1,59 @@
+import { useCallback } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
-import { AddInterviewLink, EmptyState, PageHeading } from '../components/ui/WorkspaceUI.jsx'
-import { ProgressDial, TelemetryGrid } from '../components/ui/HudVisuals.jsx'
+import { AddInterviewLink, EmptyState, PageHeading, StatusBadge } from '../components/ui/WorkspaceUI.jsx'
+import { RequestState } from '../components/ui/RequestState.jsx'
 import IrisAssistant from '../components/ui/IrisAssistant.jsx'
-
-const metrics = [
-  ['Total interviews', '▥', 'total'],
-  ['Selected interviews', '✓', 'selected'],
-  ['Rejected interviews', '×', 'rejected'],
-  ['Pending interviews', '◷', 'pending'],
-]
+import PerformanceSummary from '../components/ui/PerformanceSummary.jsx'
+import ReadinessCore from '../components/charts/ReadinessCore.jsx'
+import { PerformanceTrendChart, RoundPerformanceChart } from '../components/charts/PerformanceCharts.jsx'
+import { useRemoteData } from '../hooks/useRemoteData.js'
+import { getDashboard } from '../services/analyticsService.js'
+import { dashboardMessage } from '../utils/irisResponses.js'
+import { percent, priorityLabel } from '../utils/analyticsMetrics.js'
 
 export default function Dashboard() {
   const { displayName } = useOutletContext()
+  const load = useCallback((signal) => getDashboard(signal), [])
+  const request = useRemoteData(load)
+  const { data } = request
 
   return <>
     <PageHeading title="Career Command Center" description={`Welcome, ${displayName}.`} action={<AddInterviewLink />} />
-    <dl className="ws-metrics" aria-label="Interview statistics">
-      {metrics.map(([title, icon, tone]) => <div className="ws-card ws-stat" data-tone={tone} key={title}>
-        <dt>{title}<span className="hud-stat-icon" aria-hidden="true">{icon}</span></dt>
-        <dd><span aria-hidden="true">—</span><span className="hud-sr">Insufficient data</span></dd>
-      </div>)}
-    </dl>
+    <RequestState request={request} label="Synchronizing interview telemetry…" />
+    {data && <PerformanceSummary summary={data.summary} compact />}
     <div className="hud-overview">
-      <section className="ws-card hud-readiness">
-        <h2>Interview Readiness</h2>
-        <ProgressDial label="Readiness score unavailable" />
-        <p>Insufficient data</p>
-      </section>
-      <section className="ws-card hud-skill">
-        <h2>Skill Telemetry</h2>
-        <TelemetryGrid />
-        <p>Skill analytics will appear here when available.</p>
-      </section>
-      <IrisAssistant />
+      {data && <>
+        <ReadinessCore categories={data.categories} />
+        <RoundPerformanceChart categories={data.categories} radar />
+      </>}
+      <IrisAssistant contextMessage={dashboardMessage(data)} />
     </div>
-    <div className="ws-grid hud-detail">
-      <EmptyState title="First-Round Rejections">Insufficient data to analyse first-round rejections.</EmptyState>
-      <EmptyState title="Selection Rate">Requires at least one final selection or rejection.</EmptyState>
-      <section className="ws-card ws-empty">
-        <h2>Interview Progression</h2>
-        <p>Build a draft to see its round-by-round timeline.</p>
-        <Link to="/interviews/new">Preview a timeline →</Link>
-      </section>
-      <EmptyState title="Weakness Detection">Reported topics will appear here when weakness analytics are available.</EmptyState>
-      <EmptyState title="Recent Interview Activity">Interview history will be available once records can be saved.</EmptyState>
-    </div>
+    {data && <>
+      {!data.summary.total_interviews && <EmptyState title="Your first interview starts here">Record a company, its rounds and any topics you want to practise.</EmptyState>}
+      <div className="ws-grid data-spaced">
+        <PerformanceTrendChart data={data} />
+        <section className="ws-card">
+          <h2>Preparation Priorities</h2>
+          {data.weaknesses.length ? <ul>{data.weaknesses.slice(0, 4).map((item) => (
+            <li key={item.topic_key}><strong>{item.topic}</strong> · {item.category} · {priorityLabel(item.priority)} priority · {item.interviews} interviews</li>
+          ))}</ul> : <p>No weaknesses reported in attempted rounds.</p>}
+          <Link to="/weaknesses">Explore weaknesses →</Link>
+        </section>
+        <section className="ws-card">
+          <h2>Recent Interview Activity</h2>
+          {data.recent.length ? <ul className="data-recent">{data.recent.map((record) => <li key={record.id}>
+            <Link to={'/interviews/' + record.id}>{record.company_name}</Link> <StatusBadge status={record.overall_status} />
+            <p>{record.interview_date} · {record.rounds} configured rounds</p>
+          </li>)}</ul> : <p>Saved interviews will appear here.</p>}
+          <Link to="/interviews">Open interview history →</Link>
+        </section>
+        <section className="ws-card">
+          <h2>Selection and First-Round Outcomes</h2>
+          <p>Selection rate {percent(data.summary.selection_rate)} · {data.summary.decisions} decisions</p>
+          <p>First-round rejections {data.summary.first_rejected} · {percent(data.summary.first_rejection_rate)} of {data.summary.first_known} known first-round outcomes</p>
+          <Link to="/analytics">Open performance analytics →</Link>
+        </section>
+      </div>
+    </>}
   </>
 }

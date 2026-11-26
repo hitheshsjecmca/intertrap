@@ -1,5 +1,7 @@
 # Module 5 setup
 
+This guide describes migration 005. Migration 006 moves direct interview writes to RPCs. Use the [Modules 8–11 setup](MODULE_8_11_SETUP.md) for the current hosted API smoke test.
+
 Open the existing **intertrap** project in the Supabase Dashboard and choose **SQL Editor → New query**. Use the project administrator session to apply SQL.
 
 1. If Module 4 is pending, follow the [Module 4 preflight](MODULE_4_SETUP.md). Run migrations `001_initial_schema.sql`, `002_indexes.sql`, `003_database_triggers.sql` and `004_user_profiles.sql`, then `supabase/seed.sql`. Run the Module 4 validation before 005 because it checks that frontend grants are absent.
@@ -22,6 +24,8 @@ Open the existing **intertrap** project in the Supabase Dashboard and choose **S
 If an error leaves the transaction open, run `ROLLBACK;` and inspect the first error. A missing catalog fixture generally means the seed is pending. A missing profile means the Module 4 profile backfill or signup trigger needs checking.
 
 ## Verify real Supabase API sessions
+
+Use the following direct CRUD checks only when testing migration 005 before 006.
 
 Use an authorized test project or dedicated test accounts. Sign in as User A and User B in separate browser profiles, or use separate Supabase SDK clients with separate session storage. Use the public publishable client configuration.
 

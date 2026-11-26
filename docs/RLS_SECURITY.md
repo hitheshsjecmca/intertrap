@@ -1,5 +1,7 @@
 # InterTrap row-level security
 
+This document describes the original Module 5 grants. Migration 006 retains owner-scoped reads and moves interview writes to [transactional RPCs](MODULE_9_TRANSACTIONS.md).
+
 Supabase Auth verifies the user's identity and issues a signed JSON Web Token. Supabase's Data API verifies the token and runs the request with a PostgreSQL role, usually `authenticated` for a signed-in user and `anon` for a request without a user session. `auth.uid()` reads the request's user ID. PostgreSQL grants allow an operation on a table or specific columns. RLS then applies per-row rules to granted operations. `PUBLIC` includes all roles.
 
 | Table | Authenticated access | Ownership and immutability |

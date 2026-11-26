@@ -18,7 +18,8 @@ export function CompanyStep({ draft, change }) {
     </select></label>
     <label>Overall outcome <select value={draft.overall_status} disabled={locked}
       onChange={(event) => change('overall_status', event.target.value)}>
-      {OUTCOMES.map((outcome) => <option key={outcome} value={outcome}>{format(outcome)}</option>)}
+      {OUTCOMES.map((outcome) => <option key={outcome} value={outcome}
+        disabled={outcome === 'selected' && draft.rounds.some((round) => round.status !== 'cleared')}>{format(outcome)}</option>)}
     </select>{locked && <small>A rejected round sets the interview outcome to rejected.</small>}</label>
     <label className="if-wide">Interview notes <textarea rows="3" maxLength={LIMITS.notes} value={draft.notes}
       onChange={(event) => change('notes', event.target.value)} /></label>
@@ -41,12 +42,13 @@ export function RoundsStep({ rounds, categories, update, add, remove, move }) {
             onChange={(event) => update(round.key, 'custom_name', event.target.value)} /></label>
           <label>Round date <input type="date" value={round.round_date}
             onChange={(event) => update(round.key, 'round_date', event.target.value)} /></label>
-          <label>Round status <select value={round.status} disabled={round.status === 'not_reached'}
+          <label>Round status <select value={round.status} disabled={round.status === 'not_reached' || rounds[index - 1]?.status === 'pending'}
             onChange={(event) => update(round.key, 'status', event.target.value)}>
             {ROUND_STATUSES.map((status) => (
               <option key={status} value={status} disabled={status === 'not_reached'}>{format(status)}</option>
             ))}
-          </select>{round.status === 'not_reached' && <small>An earlier round was rejected.</small>}</label>
+          </select>{round.status === 'not_reached' && <small>An earlier round was rejected.</small>}
+          {round.status !== 'not_reached' && rounds[index - 1]?.status === 'pending' && <small>Record the previous round’s outcome first.</small>}</label>
           <label className="if-wide">Round notes <textarea rows="2" maxLength={LIMITS.notes} value={round.notes}
             onChange={(event) => update(round.key, 'notes', event.target.value)} /></label>
         </div>

@@ -3,16 +3,19 @@
 :root {
   color-scheme: dark;
   --background: #030b14;
-  --card: #081c2c;
-  --accent: #00d9ff;
-  --primary: #007bff;
+  --surface: #081c2c;
+  --surface-elevated: #0d2538;
+  --primary: #00d9ff;
+  --secondary: #007bff;
+  --card: var(--surface);
+  --accent: var(--primary);
   --success: #22c55e;
   --warning: #ffb800;
   --critical: #ff3344;
   --error: #ff8993;
   --text: #e2e8f0;
   --muted: #94a3b8;
-  --border: #24536a;
+  --border: #164e63;
   --heading-font: Orbitron, 'Segoe UI', sans-serif;
   --body-font: Inter, system-ui, 'Segoe UI', sans-serif;
   --mono-font: 'JetBrains Mono', monospace;

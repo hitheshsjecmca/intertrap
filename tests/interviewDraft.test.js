@@ -73,12 +73,19 @@ test('custom topic requires a unique nonblank normalized label', () => {
 
 test('clearance rate counts only known outcomes and is null with zero attempted rounds', () => {
   const metrics = calculateMetrics(applyProgression([
-    round('a', 'cleared', [predefined(27)]), round('b'), round('c', 'rejected'), round('d'),
+    round('a', 'cleared', [predefined(27)]), round('c', 'rejected'), round('d'),
   ]))
   assert.deepEqual(metrics, {
-    total: 4, cleared: 1, rejected: 1, pending: 1, not_reached: 1, weaknesses: 1, attempted: 2, clearanceRate: 50,
+    total: 3, cleared: 1, rejected: 1, pending: 0, not_reached: 1, weaknesses: 1, attempted: 2, clearanceRate: 50,
   })
   assert.equal(calculateMetrics(applyProgression([round('a')])).clearanceRate, null)
+})
+
+test('pending outcomes block later attempts and selected interviews need all configured rounds cleared', () => {
+  const state = draft([round('a'), round('b', 'cleared', [predefined(27)])])
+  assert.deepEqual(state.rounds.map((item) => item.status), ['pending', 'pending'])
+  assert.deepEqual(state.rounds[1].weaknesses, [])
+  assert.match(preparePayload({ ...state, overall_status: 'selected' }, catalog).error, /all configured rounds/i)
 })
 
 test('payload uses actual catalog IDs and omits ownership, internal keys and derived joins', () => {

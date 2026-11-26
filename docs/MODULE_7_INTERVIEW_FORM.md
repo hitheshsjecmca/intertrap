@@ -1,5 +1,7 @@
 # Module 7 interview preview
 
+This document describes the original preview milestones. The same form now saves through the [Module 8 CRUD flow](MODULE_8_INTERVIEW_CRUD.md).
+
 The Add Interview page has four steps. Company details collect the interview date, optional mode and context. Round cards support any number of entries, repeat categories and can be moved or removed. Attempted rounds expose category topics, custom labels, severity and notes. The final step shows the full interview, timeline and clearance statistics.
 
 The parent form uses `useState` for the draft, stage, catalog and UI feedback. Its controlled inputs receive their current value and send changes back to the parent. Each accepted change replaces the draft or the affected arrays without mutating previous state. UUIDs give round cards and weakness rows stable keys. The displayed position is recalculated from array order. A reducer would become useful if edit actions grew or needed undo history.

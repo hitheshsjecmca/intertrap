@@ -2,7 +2,7 @@ import { StatusBadge } from '../ui/WorkspaceUI.jsx'
 import { ProgressDial } from '../ui/HudVisuals.jsx'
 import { calculateMetrics, SEVERITIES } from '../../utils/interviewDraft.js'
 
-export default function InterviewReview({ draft, catalog }) {
+export default function InterviewReview({ draft, catalog, expandable = false }) {
   const metrics = calculateMetrics(draft.rounds)
   const counts = [
     ['Configured', metrics.total], ['Attempted', metrics.attempted],
@@ -38,9 +38,8 @@ export default function InterviewReview({ draft, catalog }) {
       <ol className="if-timeline">
         {draft.rounds.map((round) => {
           const category = catalog.categories.find(({ id }) => String(id) === String(round.round_type_id))?.name
-          return <li key={round.key} data-round-status={round.status}>
-            <h4>Round {round.round_number} · {round.custom_name || category}</h4>
-            <StatusBadge status={round.status} />
+          const heading = <>Round {round.round_number} · {round.custom_name || category} <StatusBadge status={round.status} /></>
+          const content = <>
             {round.custom_name && <p>Category {category}</p>}
             {round.round_date && <p>{round.round_date}</p>}
             {round.notes && <p className="if-notes">{round.notes}</p>}
@@ -51,6 +50,11 @@ export default function InterviewReview({ draft, catalog }) {
                 {weakness.notes && <p className="if-notes">{weakness.notes}</p>}
               </li>
             ))}</ul>}
+          </>
+          return <li key={round.key} data-round-status={round.status}>
+            {expandable
+              ? <details><summary>{heading}</summary>{content}{!round.notes && !round.weaknesses.length && <p>No round notes or weaknesses recorded.</p>}</details>
+              : <><h4>{heading}</h4>{content}</>}
           </li>
         })}
       </ol>
