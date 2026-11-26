@@ -1,6 +1,27 @@
+import { useState } from 'react';
+import { supabase } from './lib/supabase';
 import './App.css';
 
 function App() {
+
+  const [message, setMessage] = useState('');
+
+  async function testConnection() {
+
+    setMessage('Connecting...');
+
+    const { data, error } = await supabase
+      .from('connection_test')
+      .select('message')
+      .single();
+
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage(data.message);
+    }
+  }
+
   return (
     <div className="app">
 
@@ -13,7 +34,11 @@ function App() {
         and improve your performance with AI.
       </p>
 
-      <button>Get Started</button>
+      <button onClick={testConnection}>
+        Test Backend Connection
+      </button>
+
+      <p>{message}</p>
 
     </div>
   );
