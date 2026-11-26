@@ -1,47 +1,35 @@
-import { useState } from 'react';
-import { supabase } from './lib/supabase';
-import './App.css';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
+import Home from './pages/Home.jsx'
+import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import './App.css'
 
-function App() {
+function GuestRoute() {
+  const { user, loading } = useAuth()
 
-  const [message, setMessage] = useState('');
-
-  async function testConnection() {
-
-    setMessage('Connecting...');
-
-    const { data, error } = await supabase
-      .from('connection_test')
-      .select('message')
-      .single();
-
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage(data.message);
-    }
-  }
-
-  return (
-    <div className="app">
-
-      <h1>InterTrap</h1>
-
-      <h2>Build Yourself.</h2>
-
-      <p>
-        Track your interviews, identify your weaknesses
-        and improve your performance with AI.
-      </p>
-
-      <button onClick={testConnection}>
-        Test Backend Connection
-      </button>
-
-      <p>{message}</p>
-
-    </div>
-  );
+  if (loading) return <p className="session-status" role="status">Checking your session...</p>
+  return user ? <Navigate to="/dashboard" replace /> : <Outlet />
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  )
+}
