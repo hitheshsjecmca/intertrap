@@ -1,7 +1,8 @@
 import { supabase } from '../lib/supabase.js'
 
 export function requestMessage(error) {
-  if (['PGRST202', '42P01', '42703'].includes(error?.code)) return 'This workspace needs the latest InterTrap database migrations.'
+  if (['PGRST202', '42P01'].includes(error?.code)) return 'This workspace needs the latest InterTrap database migrations.'
+  if (['42703', '55000'].includes(error?.code)) return 'The database could not process this interview request because of a configuration error. Contact your workspace administrator.'
   if (error?.code === 'PT409') return 'This save conflicts with a previous request or newer edit. Your draft is still available. Check the saved record before retrying.'
   if (error?.code === 'PT404') return 'Interview unavailable.'
   if (['401', '42501', 'PGRST301', 'PGRST303'].includes(error?.code)) return 'Access denied. Check your session and database setup.'
