@@ -1,6 +1,6 @@
 # InterTrap — Build Yourself
 
-InterTrap is a private interview performance workspace for students and job seekers, built with React, Vite and Supabase. Record interviews and dynamic rounds, identify practice topics, revisit past outcomes and inspect performance over time. I.R.I.S. provides scripted guidance and optional browser speech.
+InterTrap is a private interview performance workspace for students and job seekers, built with React, Vite and Supabase. Record interviews and dynamic rounds, identify practice topics, revisit past outcomes and inspect performance over time. I.R.I.S. offers opt-in Gemini coaching and optional browser speech.
 
 ## Run locally
 
@@ -22,8 +22,9 @@ Use the existing Supabase project configuration with `VITE_SUPABASE_URL` and `VI
 | 9 | RPC-only mutations, idempotency, progression and version checks | [Transactions](docs/MODULE_9_TRANSACTIONS.md) |
 | 10 | Owned aggregate analytics, readiness and topic evidence | [Formulas and analytics](docs/MODULE_10_ANALYTICS.md) |
 | 11 | HUD, interactive charts and deterministic I.R.I.S. | [HUD design](docs/MODULE_11_HUD_DESIGN.md) |
+| 12 | Gemini interview reports, opt-in I.R.I.S. chat and server-side quotas | [Setup](docs/MODULE_12_SETUP.md) · [AI integration](docs/MODULE_12_AI_INTEGRATION.md) · [Security](docs/AI_SECURITY.md) |
 
-Apply any pending migrations 001–004, seed the catalogs, then apply 005, 006 and 007. Each user sees only their own private records. PostgreSQL is authoritative for progression and ownership. Charts use server aggregates, and readiness depends on observed outcomes and coverage. Drafts are in memory until a confirmed save. A stale edit must be reconciled against the latest record. Gemini integration is planned for Module 12.
+Apply any pending migrations 001–004, seed the catalogs, then apply 005 through 008. Each user sees only their own private records. PostgreSQL is authoritative for progression and ownership. Charts use server aggregates, and readiness depends on observed outcomes and coverage. Drafts are in memory until a confirmed save. A stale edit must be reconciled against the latest record. Configure Gemini only through the Module 12 Edge Function secrets before deploying the AI features.
 
 ## Verification
 

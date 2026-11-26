@@ -10,6 +10,7 @@ import './App.css'
 import './styles/workspace.css'
 import './styles/hud.css'
 import './styles/performance.css'
+import './styles/ai.css'
 
 function GuestRoute() {
   const { user, loading } = useAuth()

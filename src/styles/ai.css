@@ -1,0 +1,17 @@
+.ai-panel, .ai-transcript, .ai-panel label { display: grid; gap: .75rem; min-width: 0; }
+.ai-panel label { gap: .3rem; }
+.ai-panel label.ai-consent { display: flex; align-items: flex-start; gap: .55rem; font-size: .9rem; }
+.ai-consent input { margin-top: .3rem; width: 1.1rem; height: 1.1rem; flex: 0 0 1.1rem; accent-color: var(--accent); }
+.ai-panel textarea, .ai-panel select {
+  min-width: 0; min-height: 44px; border: 1px solid var(--border); padding: .5rem .65rem;
+  color: var(--text); background: var(--background); border-radius: 3px 8px; font: inherit;
+}
+.ai-panel textarea { resize: vertical; }
+.ai-panel ul, .ai-panel ol { padding-inline-start: 1.2rem; }
+.ai-panel h3 { font-size: 1rem; }
+.ai-panel summary { cursor: pointer; padding-block: .35rem; }
+.ai-stale { color: var(--warning); }
+.ai-caption { font-size: .85rem; }
+.iris-conversation { padding-block: .75rem; border-block: 1px solid var(--border); }
+.ai-transcript article { display: grid; gap: .35rem; overflow-wrap: anywhere; }
+.ai-transcript .iris-response p { white-space: pre-wrap; }

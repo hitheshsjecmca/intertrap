@@ -8,8 +8,8 @@ import { supabase } from '../lib/supabase.js'
 
 export function AIInsights() {
   return <>
-    <PageHeading title="AI Insights" description="I.R.I.S. provides workspace guidance. Personalised analysis is planned for a future module." />
-    <IrisAssistant initiallyOpen />
+    <PageHeading title="AI Insights" description="Ask I.R.I.S. about your recorded outcomes, reported weaknesses and preparation priorities." />
+    <IrisAssistant initiallyOpen chatEnabled />
   </>
 }
 

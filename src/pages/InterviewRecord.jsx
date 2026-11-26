@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import InterviewForm from '../components/interviews/InterviewForm.jsx'
 import InterviewReview from '../components/interviews/InterviewReview.jsx'
+import InterviewAiAnalysis from '../components/interviews/InterviewAiAnalysis.jsx'
 import { EmptyState, PageHeading } from '../components/ui/WorkspaceUI.jsx'
 import { RequestState } from '../components/ui/RequestState.jsx'
 import { useRemoteData } from '../hooks/useRemoteData.js'
@@ -65,6 +66,7 @@ function InterviewDetails({ record }) {
       <div><button className="ws-button ws-secondary data-danger" type="button"
         onClick={() => { setError(''); dialog.current.showModal() }}>Delete Interview</button></div>
     </div>
+    <div className="data-spaced"><InterviewAiAnalysis record={record} /></div>
     <dialog className="ws-card data-dialog" ref={dialog} aria-labelledby="delete-title"
       onCancel={(event) => { if (busy.current) event.preventDefault() }}>
       <h2 id="delete-title">Delete this interview?</h2>
